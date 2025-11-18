@@ -1,1 +1,1208 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Jeu tables de multiplication, pourcentages & activités enfants</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Jeu en ligne pour réviser les tables de multiplication, calculer un pourcentage de réduction, convertir les unités (m, cm, km, g, kg, L, mL) et générer des idées d’activités pour enfants selon l’âge (3-5 ans, 6-8 ans, 9-12 ans). Outils gratuits pour enseignants, animateurs et parents." />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-alt: #020617;
+      --card: #111827;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.14);
+      --text: #e5e7eb;
+      --text-soft: #9ca3af;
+      --error: #ef4444;
+      --success: #22c55e;
+      --border: #1f2933;
+      --radius-lg: 16px;
+      --radius-xl: 22px;
+      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.45);
+      --transition-fast: 0.2s ease;
+      --transition-med: 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #1e293b 0, #020617 55%, #000 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 24px 12px 40px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1080px;
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.98));
+      border-radius: 28px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      padding: 24px 18px 28px;
+      backdrop-filter: blur(18px);
+    }
+
+    @media (min-width: 768px) {
+      .app {
+        padding: 26px 26px 32px;
+      }
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 15px;
+      background: radial-gradient(circle at 20% 0%, #38bdf8, #0ea5e9 35%, #0f172a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+      flex-shrink: 0;
+    }
+
+    .brand-badge span {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #0b1120;
+    }
+
+    .brand-text h1 {
+      font-size: 1.15rem;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-text p {
+      font-size: 0.8rem;
+      color: var(--text-soft);
+    }
+
+    @media (min-width: 768px) {
+      .brand-badge {
+        width: 46px;
+        height: 46px;
+      }
+      .brand-text h1 {
+        font-size: 1.3rem;
+      }
+      .brand-text p {
+        font-size: 0.82rem;
+      }
+    }
+
+    .tagline {
+      font-size: 0.83rem;
+      color: var(--text-soft);
+      line-height: 1.5;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .nav button {
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 55%);
+      padding: 7px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: var(--text-soft);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background var(--transition-fast), border-color var(--transition-fast), transform 0.12s ease;
+    }
+
+    .nav button span.icon {
+      font-size: 1rem;
+    }
+
+    .nav button.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: radial-gradient(circle at top, rgba(56, 189, 248, 0.28), rgba(15, 23, 42, 0.98));
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.3);
+    }
+
+    .nav button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(148, 163, 184, 0.95);
+    }
+
+    main {
+      margin-top: 10px;
+    }
+
+    .tool-section {
+      display: none;
+      animation: fadeIn 0.22s ease-out;
+    }
+
+    .tool-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    @media (min-width: 768px) {
+      .grid-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.08), var(--card));
+      border-radius: var(--radius-xl);
+      padding: 16px 14px 18px;
+      border: 1px solid rgba(15, 23, 42, 0.9);
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.8);
+      position: relative;
+      overflow: hidden;
+    }
+
+    @media (min-width: 768px) {
+      .card {
+        padding: 18px 18px 20px;
+      }
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -80px;
+      background: radial-gradient(circle at 10% 0%, rgba(56, 189, 248, 0.18), transparent 55%);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title span.icon {
+      font-size: 1.1rem;
+    }
+
+    .card-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-soft);
+    }
+
+    .pill {
+      font-size: 0.7rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      color: var(--text-soft);
+      white-space: nowrap;
+    }
+
+    .label {
+      display: block;
+      font-size: 0.8rem;
+      margin-bottom: 4px;
+      color: var(--text-soft);
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 8px 9px;
+      border-radius: 10px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background 0.15s ease;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
+      background: rgba(15, 23, 42, 1);
+    }
+
+    input::placeholder {
+      color: #6b7280;
+    }
+
+    button.btn {
+      border-radius: 999px;
+      border: none;
+      padding: 7px 13px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      background: radial-gradient(circle at top left, #38bdf8, #0ea5e9);
+      color: #020617;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 14px 22px rgba(56, 189, 248, 0.35);
+      transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+    }
+
+    button.btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.08);
+      box-shadow: 0 16px 30px rgba(56, 189, 248, 0.45);
+    }
+
+    button.btn:active {
+      transform: translateY(0);
+      box-shadow: 0 8px 16px rgba(15, 23, 42, 0.9);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      color: var(--text-soft);
+      padding: 6px 11px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform 0.08s ease;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(15, 23, 42, 0.9);
+      border-color: rgba(148, 163, 184, 1);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    .status {
+      font-size: 0.8rem;
+      margin-top: 8px;
+      border-radius: 10px;
+      padding: 7px 9px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 16px;
+      align-items: center;
+    }
+
+    .status span.label-small {
+      font-size: 0.72rem;
+      color: var(--text-soft);
+    }
+
+    .status span.value {
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    .status .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+    }
+
+    .feedback {
+      font-size: 0.82rem;
+      margin-top: 8px;
+      min-height: 18px;
+    }
+
+    .feedback.success {
+      color: var(--success);
+    }
+
+    .feedback.error {
+      color: var(--error);
+    }
+
+    .question {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      letter-spacing: 0.03em;
+    }
+
+    .pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .small-text {
+      font-size: 0.78rem;
+      color: var(--text-soft);
+    }
+
+    .result-box {
+      margin-top: 8px;
+      padding: 8px 9px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(31, 41, 55, 0.95);
+      font-size: 0.84rem;
+      line-height: 1.4;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      color: var(--accent);
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .ad-slot {
+      margin: 12px 0 4px;
+      padding: 9px;
+      border-radius: 12px;
+      border: 1px dashed rgba(148, 163, 184, 0.5);
+      font-size: 0.75rem;
+      text-align: center;
+      color: var(--text-soft);
+      background: rgba(15, 23, 42, 0.75);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.76rem;
+      padding: 3px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-soft);
+    }
+
+    ul.clean-list {
+      list-style: none;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+    }
+
+    ul.clean-list li {
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title-row">
+        <div class="brand">
+          <div class="brand-badge">
+            <span>Tw</span>
+          </div>
+          <div class="brand-text">
+            <h1>Portail d’outils éducatifs & animation</h1>
+            <p>Mini outils gratuits pour enfants, parents & animateurs – version bêta</p>
+          </div>
+        </div>
+      </div>
+      <p class="tagline">
+        Jeu de tables de multiplication, calcul de pourcentage de réduction, convertisseur de grandeurs et générateur d’idées d’activités. 
+        <strong>Tout en une seule page.</strong>
+      </p>
+      <nav class="nav">
+        <button class="active" data-section="accueil"><span class="icon">🏠</span>Accueil</button>
+        <button data-section="tables"><span class="icon">🎮</span>Jeu : tables</button>
+        <button data-section="promos"><span class="icon">🧮</span>Promos & réductions</button>
+        <button data-section="convertisseur"><span class="icon">📏</span>Convertisseur</button>
+        <button data-section="activites"><span class="icon">✨</span>Activités par âge</button>
+      </nav>
+    </header>
+
+    <main>
+      <!-- ACCUEIL -->
+      <section id="accueil" class="tool-section active">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-inner">
+              <div class="card-header-row">
+                <div>
+                  <div class="card-title"><span class="icon">🎮</span>Jeu de tables de multiplication</div>
+                  <div class="card-subtitle">Un mini-jeu rapide pour réviser les tables, avec score et série de bonnes réponses.</div>
+                </div>
+                <button class="btn-ghost" onclick="showSection('tables')">Lancer</button>
+              </div>
+              <ul class="clean-list">
+                <li>• Jeu de tables de multiplication en ligne</li>
+                <li>• Score et série en temps réel</li>
+                <li>• Feedback instantané pour l’enfant</li>
+              </ul>
+              <div class="ad-slot">
+                <!-- ESPACE PUB ACCUEIL 1 -->
+                Espace pub – à remplir (AdSense / Ezoic)
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-inner">
+              <div class="card-header-row">
+                <div>
+                  <div class="card-title"><span class="icon">🧮</span>Calcul de promotions en %</div>
+                  <div class="card-subtitle">Calcule le prix après réduction ou le pourcentage de remise réalisé.</div>
+                </div>
+                <button class="btn-ghost" onclick="showSection('promos')">Tester</button>
+              </div>
+              <ul class="clean-list">
+                <li>• Calcul du prix après réduction</li>
+                <li>• Calcul du pourcentage de réduction</li>
+                <li>• Idéal pour les maths du quotidien</li>
+              </ul>
+              <div class="ad-slot">
+                <!-- ESPACE PUB ACCUEIL 2 -->
+                Zone pub – affichage automatique des annonces
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-inner">
+              <div class="card-header-row">
+                <div>
+                  <div class="card-title"><span class="icon">📏</span>Convertisseur de grandeurs</div>
+                  <div class="card-subtitle">Longueurs, masses, volumes : convertis les unités les plus courantes.</div>
+                </div>
+                <button class="btn-ghost" onclick="showSection('convertisseur')">Convertir</button>
+              </div>
+              <ul class="clean-list">
+                <li>• m, cm, km, mm</li>
+                <li>• g, kg</li>
+                <li>• L, mL</li>
+              </ul>
+              <div class="ad-slot">
+                <!-- ESPACE PUB ACCUEIL 3 -->
+                Espace pub – format bandeau
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-inner">
+              <div class="card-header-row">
+                <div>
+                  <div class="card-title"><span class="icon">✨</span>Générateur d’activités par âge</div>
+                  <div class="card-subtitle">Des idées de jeux adaptées aux tranches d’âge, pour les animateurs & parents.</div>
+                </div>
+                <button class="btn-ghost" onclick="showSection('activites')">Générer</button>
+              </div>
+              <ul class="clean-list">
+                <li>• Activités pour enfants 3–5 ans</li>
+                <li>• Activités pour enfants 6–8 ans</li>
+                <li>• Activités pour enfants 9–12 ans</li>
+              </ul>
+              <div class="ad-slot">
+                <!-- ESPACE PUB ACCUEIL 4 -->
+                Espace pub – idéal pour une annonce native
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- JEU TABLES -->
+      <section id="tables" class="tool-section">
+        <div class="card">
+          <div class="card-inner">
+            <div class="card-header-row">
+              <div>
+                <div class="card-title"><span class="icon">🎮</span>Jeu de tables de multiplication</div>
+                <div class="card-subtitle">Choisis une table, réponds le plus vite possible et fais grimper ton score.</div>
+              </div>
+              <span class="pill">Mode entraînement rapide</span>
+            </div>
+
+            <div class="grid">
+              <div>
+                <label for="table-select" class="label">Table à travailler</label>
+                <select id="table-select">
+                  <option value="random">Toutes mélangées</option>
+                  <option value="2">Table de 2</option>
+                  <option value="3">Table de 3</option>
+                  <option value="4">Table de 4</option>
+                  <option value="5">Table de 5</option>
+                  <option value="6">Table de 6</option>
+                  <option value="7">Table de 7</option>
+                  <option value="8">Table de 8</option>
+                  <option value="9">Table de 9</option>
+                  <option value="10">Table de 10</option>
+                </select>
+              </div>
+              <div>
+                <label class="label">Options</label>
+                <div class="pill-group">
+                  <span class="tag"><span>🔁</span>Questions illimitées</span>
+                  <span class="tag"><span>⭐</span>+1 point par bonne réponse</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin: 10px 0 8px; padding: 10px 11px; border-radius: 14px; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(31, 41, 55, 0.95);">
+              <div class="question" id="question-text">Clique sur « Nouvelle question » pour commencer</div>
+              <div class="grid">
+                <div>
+                  <label for="answer-input" class="label">Ta réponse</label>
+                  <input id="answer-input" type="number" placeholder="Entre ta réponse ici" />
+                </div>
+                <div style="display:flex; align-items:flex-end; gap:8px; flex-wrap:wrap;">
+                  <button class="btn" id="btn-check">
+                    Valider
+                  </button>
+                  <button class="btn-ghost" id="btn-next">
+                    Nouvelle question
+                  </button>
+                </div>
+              </div>
+              <div id="feedback" class="feedback"></div>
+            </div>
+
+            <div class="status">
+              <span class="dot"></span>
+              <span class="label-small">Score :</span>
+              <span class="value" id="score">0</span>
+
+              <span class="label-small">Série :</span>
+              <span class="value" id="streak">0</span>
+
+              <span class="label-small">Meilleure série :</span>
+              <span class="value" id="best-streak">0</span>
+            </div>
+
+            <div class="ad-slot">
+              <!-- ESPACE PUB TABLES -->
+              Zone pub sous le jeu de tables.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROMOS -->
+      <section id="promos" class="tool-section">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-inner">
+              <div class="card-header-row">
+                <div>
+                  <div class="card-title"><span class="icon">💸</span>Prix après réduction</div>
+                  <div class="card-subtitle">Indique le prix de départ et le pourcentage de réduction.</div>
+                </div>
+                <span class="pill">Calcul direct</span>
+              </div>
+
+              <label for="promo-prix-base" class="label">Prix de départ (€)</label>
+              <input id="promo-prix-base" type="number" step="0.01" placeholder="Ex : 49.99" />
+
+              <label for="promo-pourcentage" class="label" style="margin-top:8px;">Réduction (%)</label>
+              <input id="promo-pourcentage" type="number" step="0.01" placeholder="Ex : 30" />
+
+              <button class="btn" id="btn-promo-calcul" style="margin-top:10px;">
+                Calculer le prix remisé
+              </button>
+
+              <div id="promo-result" class="result-box" style="display:none;"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-inner">
+              <div class="card-header-row">
+                <div>
+                  <div class="card-title"><span class="icon">📉</span>Pourcentage de réduction</div>
+                  <div class="card-subtitle">Indique le prix avant et après la promo.</div>
+                </div>
+                <span class="pill">Calcul inverse</span>
+              </div>
+
+              <label for="promo-avant" class="label">Prix avant promo (€)</label>
+              <input id="promo-avant" type="number" step="0.01" placeholder="Ex : 59.99" />
+
+              <label for="promo-apres" class="label" style="margin-top:8px;">Prix après promo (€)</label>
+              <input id="promo-apres" type="number" step="0.01" placeholder="Ex : 39.99" />
+
+              <button class="btn" id="btn-promo-inverse" style="margin-top:10px;">
+                Calculer le % de réduction
+              </button>
+
+              <div id="promo-inverse-result" class="result-box" style="display:none;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ad-slot">
+          <!-- ESPACE PUB PROMOS -->
+          Espace pub – idéal pour des annonces liées au shopping / bons plans.
+        </div>
+      </section>
+
+      <!-- CONVERTISSEUR GRANDEURS -->
+      <section id="convertisseur" class="tool-section">
+        <div class="card">
+          <div class="card-inner">
+            <div class="card-header-row">
+              <div>
+                <div class="card-title"><span class="icon">📏</span>Convertisseur de grandeurs</div>
+                <div class="card-subtitle">Convertis facilement longueurs, masses et volumes.</div>
+              </div>
+              <span class="pill">Unités courantes</span>
+            </div>
+
+            <div class="grid grid-2">
+              <div>
+                <label for="type-grandeur" class="label">Type de grandeur</label>
+                <select id="type-grandeur">
+                  <option value="longueur">Longueur (m, cm, km)</option>
+                  <option value="masse">Masse (g, kg)</option>
+                  <option value="volume">Volume (L, mL)</option>
+                </select>
+              </div>
+              <div>
+                <label for="valeur-a-convertir" class="label">Valeur</label>
+                <input id="valeur-a-convertir" type="number" step="0.0001" placeholder="Ex : 1.5" />
+              </div>
+            </div>
+
+            <div class="grid grid-2" style="margin-top:8px;">
+              <div>
+                <label for="unite-de" class="label">De</label>
+                <select id="unite-de"></select>
+              </div>
+              <div>
+                <label for="unite-vers" class="label">Vers</label>
+                <select id="unite-vers"></select>
+              </div>
+            </div>
+
+            <button class="btn" id="btn-convertir" style="margin-top:10px;">
+              Convertir
+            </button>
+
+            <div id="convert-result" class="result-box" style="display:none;"></div>
+
+            <p class="small-text" style="margin-top:8px;">
+              Astuce : tu peux t’en servir en classe pour montrer les liens entre unités (ex : 1 km = 1000 m).
+            </p>
+
+            <div class="ad-slot">
+              <!-- ESPACE PUB CONVERTISSEUR -->
+              Zone pub – idéale pour des annonces éducatives / scolaires.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ACTIVITÉS PAR ÂGE -->
+      <section id="activites" class="tool-section">
+        <div class="card">
+          <div class="card-inner">
+            <div class="card-header-row">
+              <div>
+                <div class="card-title"><span class="icon">✨</span>Générateur d’activités par âge</div>
+                <div class="card-subtitle">Choisis un âge et une ambiance, puis laisse l’outil proposer une activité.</div>
+              </div>
+              <span class="pill">Pour animateurs & parents</span>
+            </div>
+
+            <div class="grid grid-2">
+              <div>
+                <label for="age-groupe" class="label">Tranche d’âge</label>
+                <select id="age-groupe">
+                  <option value="3-5">3–5 ans</option>
+                  <option value="6-8">6–8 ans</option>
+                  <option value="9-12">9–12 ans</option>
+                </select>
+              </div>
+              <div>
+                <label for="type-activite" class="label">Type d’activité</label>
+                <select id="type-activite">
+                  <option value="calme">Calme</option>
+                  <option value="dynamique">Dynamique</option>
+                  <option value="creatif">Créatif</option>
+                  <option value="interieur">Intérieur</option>
+                  <option value="exterieur">Extérieur</option>
+                </select>
+              </div>
+            </div>
+
+            <button class="btn" id="btn-generer-activite" style="margin-top:10px;">
+              Générer une idée d’activité
+            </button>
+
+            <div id="activite-result" class="result-box" style="display:none; margin-top:10px;"></div>
+
+            <p class="small-text" style="margin-top:8px;">
+              Tu peux adapter les consignes, la durée ou le matériel selon ton contexte. Les idées proposées sont une base à personnaliser.
+            </p>
+
+            <div class="ad-slot">
+              <!-- ESPACE PUB ACTIVITÉS -->
+              Zone pub – idéale pour annonces autour de jeux, livres, matériel pédagogique.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BLOC TEXTE SEO -->
+      <section style="margin-top:16px; font-size:0.8rem; color:#9ca3af; background:rgba(15,23,42,0.9); border-radius:16px; padding:12px 14px; border:1px solid rgba(31,41,55,0.9);">
+        <h2 style="font-size:0.9rem; margin-bottom:4px;">Outils éducatifs en ligne pour enfants, enseignants et animateurs</h2>
+        <p style="margin-bottom:4px;">
+          Ce mini site propose plusieurs outils éducatifs gratuits : un jeu en ligne pour réviser les tables de
+          multiplication, un calculateur de pourcentage de réduction pour s’entraîner sur les promotions, un
+          convertisseur d’unités (longueurs, masses, volumes : m, cm, km, mm, g, kg, L, mL) et un générateur d’idées
+          d’activités pour enfants par tranche d’âge (3-5 ans, 6-8 ans, 9-12 ans).
+        </p>
+        <p>
+          Ces outils sont pensés pour les enseignants, les animateurs en centre de loisirs, les parents ou toute
+          personne souhaitant proposer des exercices de mathématiques ludiques et des activités adaptées à l’âge des
+          enfants. De nouveaux outils éducatifs pourront être ajoutés progressivement.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Navigation
+    const navButtons = document.querySelectorAll(".nav button");
+    const sections = document.querySelectorAll(".tool-section");
+
+    function showSection(id) {
+      sections.forEach((sec) => {
+        sec.classList.toggle("active", sec.id === id);
+      });
+      navButtons.forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.section === id);
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    navButtons.forEach((btn) => {
+      btn.addEventListener("click", () => showSection(btn.dataset.section));
+    });
+
+    // --- Jeu des tables ---
+    const tableSelect = document.getElementById("table-select");
+    const questionText = document.getElementById("question-text");
+    const answerInput = document.getElementById("answer-input");
+    const btnCheck = document.getElementById("btn-check");
+    const btnNext = document.getElementById("btn-next");
+    const feedback = document.getElementById("feedback");
+    const scoreSpan = document.getElementById("score");
+    const streakSpan = document.getElementById("streak");
+    const bestStreakSpan = document.getElementById("best-streak");
+
+    let currentA = null;
+    let currentB = null;
+    let score = 0;
+    let streak = 0;
+    let bestStreak = 0;
+    let questionActive = false;
+
+    function nouvelleQuestion() {
+      const tableValue = tableSelect.value;
+      const b = Math.floor(Math.random() * 10) + 1;
+      let a;
+
+      if (tableValue === "random") {
+        a = Math.floor(Math.random() * 10) + 1;
+      } else {
+        a = parseInt(tableValue, 10);
+      }
+
+      currentA = a;
+      currentB = b;
+      questionText.textContent = `${a} × ${b} = ?`;
+      feedback.textContent = "";
+      feedback.className = "feedback";
+      answerInput.value = "";
+      answerInput.focus();
+      questionActive = true;
+    }
+
+    function verifierReponse() {
+      if (!questionActive || currentA === null || currentB === null) {
+        feedback.textContent = "Clique d’abord sur « Nouvelle question ».";
+        feedback.className = "feedback error";
+        return;
+      }
+      const userValue = parseInt(answerInput.value, 10);
+      if (isNaN(userValue)) {
+        feedback.textContent = "Entre un nombre avant de valider.";
+        feedback.className = "feedback error";
+        return;
+      }
+
+      const bonneReponse = currentA * currentB;
+      if (userValue === bonneReponse) {
+        score += 1;
+        streak += 1;
+        bestStreak = Math.max(bestStreak, streak);
+        feedback.textContent = "Bravo, c’est correct ! 🎉";
+        feedback.className = "feedback success";
+      } else {
+        feedback.textContent = `Raté : ${currentA} × ${currentB} = ${bonneReponse}. Ta série repart à 0.`;
+        feedback.className = "feedback error";
+        streak = 0;
+      }
+
+      scoreSpan.textContent = score;
+      streakSpan.textContent = streak;
+      bestStreakSpan.textContent = bestStreak;
+      questionActive = false;
+    }
+
+    btnNext.addEventListener("click", nouvelleQuestion);
+    btnCheck.addEventListener("click", verifierReponse);
+    answerInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        verifierReponse();
+      }
+    });
+
+    // --- Calcul promos ---
+    const promoPrixBase = document.getElementById("promo-prix-base");
+    const promoPourcentage = document.getElementById("promo-pourcentage");
+    const btnPromoCalcul = document.getElementById("btn-promo-calcul");
+    const promoResult = document.getElementById("promo-result");
+
+    const promoAvant = document.getElementById("promo-avant");
+    const promoApres = document.getElementById("promo-apres");
+    const btnPromoInverse = document.getElementById("btn-promo-inverse");
+    const promoInverseResult = document.getElementById("promo-inverse-result");
+
+    btnPromoCalcul.addEventListener("click", () => {
+      const base = parseFloat(promoPrixBase.value.replace(",", "."));
+      const pct = parseFloat(promoPourcentage.value.replace(",", "."));
+
+      if (isNaN(base) || isNaN(pct)) {
+        promoResult.style.display = "block";
+        promoResult.textContent = "Merci de renseigner un prix de départ et un pourcentage valides.";
+        return;
+      }
+
+      const reduction = (base * pct) / 100;
+      const final = base - reduction;
+
+      promoResult.style.display = "block";
+      promoResult.innerHTML = `
+        Prix de départ : ${base.toFixed(2)} €<br/>
+        Réduction : ${reduction.toFixed(2)} €<br/>
+        <strong>Prix après réduction : ${final.toFixed(2)} €</strong>
+      `;
+    });
+
+    btnPromoInverse.addEventListener("click", () => {
+      const avant = parseFloat(promoAvant.value.replace(",", "."));
+      const apres = parseFloat(promoApres.value.replace(",", "."));
+
+      if (isNaN(avant) || isNaN(apres) || avant <= 0 || apres < 0 || apres > avant) {
+        promoInverseResult.style.display = "block";
+        promoInverseResult.textContent = "Merci de vérifier les prix (le prix après promo doit être inférieur au prix avant promo).";
+        return;
+      }
+
+      const reduction = avant - apres;
+      const pct = (reduction / avant) * 100;
+
+      promoInverseResult.style.display = "block";
+      promoInverseResult.innerHTML = `
+        Remise : ${reduction.toFixed(2)} €<br/>
+        <strong>Réduction : ${pct.toFixed(2)} %</strong>
+      `;
+    });
+
+    // --- Convertisseur de grandeurs ---
+    const typeGrandeur = document.getElementById("type-grandeur");
+    const valeurConvertir = document.getElementById("valeur-a-convertir");
+    const uniteDe = document.getElementById("unite-de");
+    const uniteVers = document.getElementById("unite-vers");
+    const btnConvertir = document.getElementById("btn-convertir");
+    const convertResult = document.getElementById("convert-result");
+
+    const unitsConfig = {
+      longueur: {
+        base: "m",
+        units: {
+          mm: 0.001,
+          cm: 0.01,
+          m: 1,
+          km: 1000
+        }
+      },
+      masse: {
+        base: "g",
+        units: {
+          g: 1,
+          kg: 1000
+        }
+      },
+      volume: {
+        base: "L",
+        units: {
+          mL: 0.001,
+          L: 1
+        }
+      }
+    };
+
+    function populateUnites() {
+      const type = typeGrandeur.value;
+      const config = unitsConfig[type];
+
+      uniteDe.innerHTML = "";
+      uniteVers.innerHTML = "";
+
+      Object.keys(config.units).forEach((u) => {
+        const opt1 = document.createElement("option");
+        opt1.value = u;
+        opt1.textContent = u;
+        uniteDe.appendChild(opt1);
+
+        const opt2 = document.createElement("option");
+        opt2.value = u;
+        opt2.textContent = u;
+        uniteVers.appendChild(opt2);
+      });
+
+      const keys = Object.keys(config.units);
+      if (keys.length >= 2) {
+        uniteDe.value = keys[0];
+        uniteVers.value = keys[keys.length - 1];
+      }
+    }
+
+    typeGrandeur.addEventListener("change", populateUnites);
+    populateUnites();
+
+    btnConvertir.addEventListener("click", () => {
+      const type = typeGrandeur.value;
+      const config = unitsConfig[type];
+
+      const value = parseFloat(valeurConvertir.value.replace(",", "."));
+      if (isNaN(value)) {
+        convertResult.style.display = "block";
+        convertResult.textContent = "Merci d’indiquer une valeur à convertir.";
+        return;
+      }
+
+      const fromUnit = uniteDe.value;
+      const toUnit = uniteVers.value;
+
+      if (fromUnit === toUnit) {
+        convertResult.style.display = "block";
+        convertResult.textContent = "Tu as choisi la même unité en départ et en arrivée. Rien à convertir 😉";
+        return;
+      }
+
+      const factorFrom = config.units[fromUnit];
+      const factorTo = config.units[toUnit];
+
+      const inBase = value * factorFrom;
+      const converted = inBase / factorTo;
+
+      convertResult.style.display = "block";
+      convertResult.innerHTML = `
+        ${value} ${fromUnit} = <strong>${converted.toFixed(4)} ${toUnit}</strong>
+      `;
+    });
+
+    // --- Générateur d’activités ---
+    const ageGroupe = document.getElementById("age-groupe");
+    const typeActivite = document.getElementById("type-activite");
+    const btnGenererActivite = document.getElementById("btn-generer-activite");
+    const activiteResult = document.getElementById("activite-result");
+
+    const activites = [
+      {
+        age: "3-5",
+        types: ["calme", "interieur"],
+        titre: "Le sac à surprises sensorielles",
+        description: "Les enfants plongent la main dans un sac opaque contenant différents objets (peluche, ballon de baudruche vide, cube, cuillère en plastique…). Ils doivent décrire ce qu’ils sentent, puis deviner de quoi il s’agit. On révèle ensuite l’objet.",
+        materiel: "Sac opaque, 8–10 petits objets aux textures variées.",
+        duree: "10–15 minutes"
+      },
+      {
+        age: "3-5",
+        types: ["dynamique", "exterieur"],
+        titre: "Les couleurs magiques",
+        description: "Dispose des cerceaux ou feuilles de couleur au sol. Annonce une couleur : les enfants doivent vite aller se placer dessus. Tu peux varier avec « marche comme un robot jusqu’au bleu », etc.",
+        materiel: "Cerceaux de couleur ou feuilles A4 colorées.",
+        duree: "10–20 minutes"
+      },
+      {
+        age: "6-8",
+        types: ["creatif", "interieur", "calme"],
+        titre: "Mon blason de super-héros / super-héroïne",
+        description: "Chaque enfant crée son blason personnel sur une feuille : symbole, couleurs, pouvoir principal. Ensuite, petit tour de table où chacun présente son blason.",
+        materiel: "Feuilles A4, crayons, feutres, éventuellement gommettes.",
+        duree: "25–35 minutes"
+      },
+      {
+        age: "6-8",
+        types: ["dynamique", "exterieur"],
+        titre: "Course aux missions",
+        description: "En petits groupes, les enfants récupèrent des cartes-missions (mimer un animal, trouver un objet rouge, faire une statue collective…). Chaque mission validée rapporte un point.",
+        materiel: "Cartes missions (papier + crayon), éventuellement plots.",
+        duree: "20–30 minutes"
+      },
+      {
+        age: "9-12",
+        types: ["creatif", "interieur"],
+        titre: "Créer un mini-jeu de société",
+        description: "Par petits groupes, les enfants imaginent un mini-jeu simple (plateau, cartes, pions). Ils testent ensuite les jeux des autres groupes.",
+        materiel: "Feuilles, ciseaux, crayons, gommettes, pions (boutons, cailloux…).",
+        duree: "45–60 minutes"
+      },
+      {
+        age: "9-12",
+        types: ["dynamique", "exterieur"],
+        titre: "Ultimate balle aux défis",
+        description: "Un terrain, deux équipes. Quand un joueur se fait toucher par la balle, il tire une carte-défi (question quiz, mini-épreuve) pour rester en jeu.",
+        materiel: "Balle en mousse, cartes défis préparées à l’avance.",
+        duree: "30–40 minutes"
+      },
+      {
+        age: "6-8",
+        types: ["calme", "interieur"],
+        titre: "Le téléphone dessiné",
+        description: "En file, le premier reçoit une image simple (maison, fleur, monstre rigolo) et doit la décrire au suivant qui la dessine sans la voir. On compare ensuite le dessin final à l’image de départ.",
+        materiel: "Petites images, feuilles, crayons.",
+        duree: "20–25 minutes"
+      },
+      {
+        age: "9-12",
+        types: ["interieur", "calme"],
+        titre: "Enigmes en chaîne",
+        description: "Les enfants découvrent une série de petites énigmes (logique, chiffres, lettres) à résoudre en groupe. Chaque énigme validée donne un indice pour trouver un mot final.",
+        materiel: "Enigmes imprimées ou écrites à la main, feuilles et stylos.",
+        duree: "25–35 minutes"
+      }
+    ];
+
+    function genererActivite() {
+      const age = ageGroupe.value;
+      const type = typeActivite.value;
+
+      const filtrees = activites.filter((act) => {
+        return act.age === age && act.types.includes(type);
+      });
+
+      let pool = filtrees;
+      if (pool.length === 0) {
+        pool = activites.filter((act) => act.age === age);
+      }
+
+      if (pool.length === 0) {
+        activiteResult.style.display = "block";
+        activiteResult.textContent = "Pas encore d’idée enregistrée pour ce profil. Tu peux en ajouter directement dans le code 😉";
+        return;
+      }
+
+      const choisie = pool[Math.floor(Math.random() * pool.length)];
+
+      activiteResult.style.display = "block";
+      activiteResult.innerHTML = `
+        <div class="badge">
+          <span class="badge-dot"></span>
+          Idée d’activité générée
+        </div>
+        <h3 style="margin-top:6px; font-size:0.95rem;">${choisie.titre}</h3>
+        <p style="margin-top:4px; font-size:0.85rem;">${choisie.description}</p>
+        <p style="margin-top:6px; font-size:0.8rem;"><strong>Matériel :</strong> ${choisie.materiel}</p>
+        <p style="margin-top:2px; font-size:0.8rem;"><strong>Durée indicative :</strong> ${choisie.duree}</p>
+        <p style="margin-top:6px; font-size:0.78rem; color:#9ca3af;">
+          Astuce : adapte la difficulté (règles, temps, nombre d’enfants) selon ton groupe et ton cadre (ALSH, école, colo…).
+        </p>
+      `;
+    }
+
+    btnGenererActivite.addEventListener("click", genererActivite);
+  </script>
+</body>
+</html>
 
